@@ -111,7 +111,7 @@ bool uf_hashmap_simple_equal(const void *a, const void *b)
 
 uint32_t uf_hashmap_simple_hash(const void *v)
 {
-        return (uint32_t)((uintptr_t)(v));
+        return UF_PTR_TO_INT(v);
 }
 
 /**
