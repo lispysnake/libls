@@ -9,8 +9,11 @@
  * version 2.1 of the License, or (at your option) any later version.
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "map.h"
 #include "util.h"
@@ -20,29 +23,31 @@ int main(__uf_unused__ int argc, __uf_unused__ char **argv)
         UfHashmap *map = NULL;
         int ret = EXIT_FAILURE;
 
-        map = uf_hashmap_new(uf_hashmap_simple_hash, uf_hashmap_simple_equal);
+        map = uf_hashmap_new_full(uf_hashmap_string_hash, uf_hashmap_string_equal, free, NULL);
         if (!map) {
                 return EXIT_FAILURE;
         }
 
         for (int i = 0; i < 500; i++) {
-                const void *ret = NULL;
-                if (!uf_hashmap_put(map, UF_INT_TO_PTR(i), UF_INT_TO_PTR(i))) {
+                char *p = NULL;
+                if (asprintf(&p, "STRING: %d", i) < 0) {
+                        abort();
+                }
+                const char *ret = NULL;
+                if (!uf_hashmap_put(map, p, p)) {
+                        free(p);
                         fprintf(stderr, "Storage failed\n");
                         goto end;
                 }
-                ret = uf_hashmap_get(map, UF_INT_TO_PTR(i));
-                int r = (int)UF_PTR_TO_INT(ret);
-                if (r != i) {
-                        fprintf(stderr, "No match! Got %d expected %d\n", r, i);
+
+                ret = uf_hashmap_get(map, p);
+                if (strcmp(p, ret) != 0) {
+                        fprintf(stderr, "No match! Got %s expected %s\n", ret, p);
                         goto end;
                 }
-                fprintf(stderr, "%d = %d\n", r, i);
         }
 
-        fprintf(stderr, "30 is now %d\n", UF_PTR_TO_INT(uf_hashmap_get(map, UF_INT_TO_PTR(30))));
-        uf_hashmap_put(map, UF_INT_TO_PTR(30), UF_INT_TO_PTR(20));
-        fprintf(stderr, "30 is now %d\n", UF_PTR_TO_INT(uf_hashmap_get(map, UF_INT_TO_PTR(30))));
+        fprintf(stdout, "20 = %s\n", (char *)uf_hashmap_get(map, "STRING: 20"));
 
         ret = EXIT_SUCCESS;
 end:
