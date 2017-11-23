@@ -1,0 +1,1 @@
+option('with-tests', type: 'boolean', value: 'true', description: 'Enable the test suite (recommended)')
