@@ -46,11 +46,12 @@ struct UfHashmap {
 
 /**
  * A UfHashmapNode is simply a single bucket within a UfHashmap and can have
- * a key/value. This is not a chained mechanism.
+ * a key/value. This is a chained mechanism.
  */
 struct UfHashmapNode {
         void *key;
         void *value;
+        struct UfHashmapNode *next;
         uint32_t hash;
 };
 
