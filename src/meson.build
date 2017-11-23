@@ -2,6 +2,7 @@
 
 libuf_sources = [
     'core.c',
+    'map.c',
 ]
 
 libuf = library('uf',
