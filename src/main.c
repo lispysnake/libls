@@ -40,6 +40,10 @@ int main(__uf_unused__ int argc, __uf_unused__ char **argv)
                 fprintf(stderr, "%d = %d\n", r, i);
         }
 
+        fprintf(stderr, "30 is now %d\n", UF_PTR_TO_INT(uf_hashmap_get(map, UF_INT_TO_PTR(30))));
+        uf_hashmap_put(map, UF_INT_TO_PTR(30), UF_INT_TO_PTR(20));
+        fprintf(stderr, "30 is now %d\n", UF_PTR_TO_INT(uf_hashmap_get(map, UF_INT_TO_PTR(30))));
+
         ret = EXIT_SUCCESS;
 end:
         uf_hashmap_free(map);

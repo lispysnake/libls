@@ -29,6 +29,15 @@ typedef struct UfHashmapNode UfHashmapNode;
 #define UF_HASH_FILL_RATE 0.6
 
 /**
+ * Instead of forcing a new field to account for NULL/0 glibc issues, we simply
+ * always apply this mask to the hash field upon storage.
+ *
+ * This effectively acts as a cheap tombstone mechanism by flagging the key
+ * within a Thing.
+ */
+#define UF_KEY_SET 0x000001
+
+/**
  * Opaque UfHashmap implementation, simply an organised header for the
  * function pointers, state and buckets.
  */
@@ -102,10 +111,29 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
         return ret;
 }
 
+static inline void bucket_free(UfHashmap *self, UfHashmapNode *node)
+{
+        if (!node) {
+                return;
+        }
+        bucket_free(self, node->next);
+        if (self->free.key) {
+                self->free.key(node->key);
+        }
+        if (self->free.value) {
+                self->free.value(node->value);
+        }
+        free(node);
+}
+
 void uf_hashmap_free(UfHashmap *self)
 {
         if (uf_unlikely(!self)) {
                 return;
+        }
+        for (size_t i = 0; i < self->buckets.max; i++) {
+                UfHashmapNode *node = &self->buckets.blob[i];
+                bucket_free(self, node->next);
         }
         free(self->buckets.blob);
         free(self);
@@ -134,6 +162,7 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
 {
         UfHashmapNode *bucket = NULL;
         uint32_t hash;
+        UfHashmapNode *candidate = NULL;
 
         if (uf_unlikely(!self)) {
                 return false;
@@ -149,14 +178,48 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
         /* Cheat for now. Soon, we need to handle collisions */
         bucket = uf_hashmap_initial_bucket(self, hash);
 
-        /* cheating, i know. */
-        if (bucket->hash) {
+        for (UfHashmapNode *node = bucket; node; node = node->next) {
+                /* Root node isn't occupied */
+                if (node->hash == 0) {
+                        candidate = node;
+                        /* We have more buckets used now */
+                        ++self->buckets.current;
+                        break;
+                }
+
+                /* Attempt to find dupe */
+                if (uf_unlikely(self->key.compare(node->key, key))) {
+                        candidate = node;
+                        /* Replacing a bucket, no diff in count */
+                        break;
+                }
+        }
+
+        /* Displace an existing node */
+        if (uf_unlikely(candidate != NULL)) {
+                if (self->free.key) {
+                        self->free.key(candidate->key);
+                        self->free.value(candidate->value);
+                }
+                candidate->hash = hash ^ UF_KEY_SET;
+                candidate->key = key;
+                candidate->value = value;
+                return true;
+        }
+
+        /* Construct a new input node */
+        candidate = calloc(1, sizeof(UfHashmapNode));
+        if (uf_unlikely(!candidate)) {
                 return false;
         }
 
-        bucket->hash = hash;
-        bucket->key = key;
-        bucket->value = value;
+        /* Prepend and balance leaf */
+        candidate->hash = hash ^ UF_KEY_SET; /* We have something stored. */
+        candidate->key = key;
+        candidate->value = value;
+        candidate->next = bucket->next;
+        bucket->next = candidate;
+        ++self->buckets.current;
 
         return true;
 }
@@ -171,13 +234,15 @@ void *uf_hashmap_get(UfHashmap *self, void *key)
         }
 
         hash = self->key.hash(key);
-
-        /* Cheat for now. Soon, we need to handle collisions */
         bucket = uf_hashmap_initial_bucket(self, hash);
-        if (!self->key.compare(bucket->key, key)) {
-                return NULL;
+
+        for (UfHashmapNode *node = bucket; node; node = node->next) {
+                if (self->key.compare(node->key, key)) {
+                        return node->value;
+                }
         }
-        return bucket->value;
+
+        return NULL;
 }
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
