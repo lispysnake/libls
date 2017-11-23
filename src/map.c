@@ -9,16 +9,29 @@
  * version 2.1 of the License, or (at your option) any later version.
  */
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include "map.h"
 #include "util.h"
+
+typedef struct UfHashmapNode UfHashmapNode;
+
+/**
+ * Initial size of 128 items. Slight overcommit but prevents too much future
+ * growth as our growth ratio and algorithm is ^2 based.
+ */
+#define UF_HASH_INITIAL_SIZE 128
 
 /**
  * Opaque UfHashmap implementation, simply an organised header for the
  * function pointers, state and buckets.
  */
 struct UfHashmap {
+        UfHashmapNode *buckets; /**<Contiguous blob of buckets, over-commits */
+        int n_buckets;          /**<How many buckets are currently allocated? */
+        int n_elements;         /**<How many items do we currently have? */
+
         struct {
                 uf_hashmap_hash_func key;    /**<Key hash generator */
                 uf_hashmap_equal_func value; /**<Key value comparison */
@@ -27,6 +40,15 @@ struct UfHashmap {
                 uf_hashmap_free_func key;   /**<Key free function */
                 uf_hashmap_free_func value; /**<Value free function */
         } free;
+};
+
+/**
+ * A UfHashmapNode is simply a single bucket within a UfHashmap and can have
+ * a key/value. This is not a chained mechanism.
+ */
+struct UfHashmapNode {
+        void *key;
+        void *value;
 };
 
 UfHashmap *uf_hashmap_new(uf_hashmap_hash_func hash, uf_hashmap_equal_func compare)
@@ -46,23 +68,32 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
                 .free.value = value_free,
         };
 
+        /* Some things we actually do need, sorry programmer. */
+        assert(clone.hash.key);
+        assert(clone.hash.value);
+
         ret = calloc(1, sizeof(struct UfHashmap));
         if (!ret) {
                 return NULL;
         }
         *ret = clone;
 
-        /* TODO: Assign buckets and such */
+        ret->buckets = calloc(UF_HASH_INITIAL_SIZE, sizeof(struct UfHashmapNode));
+        if (!ret->buckets) {
+                uf_hashmap_free(ret);
+                return NULL;
+        }
 
         return ret;
 }
 
-void uf_hashmap_free(UfHashmap *map)
+void uf_hashmap_free(UfHashmap *self)
 {
-        if (uf_unlikely(!map)) {
+        if (uf_unlikely(!self)) {
                 return;
         }
-        free(map);
+        free(self->buckets);
+        free(self);
         return;
 }
 
