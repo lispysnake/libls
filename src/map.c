@@ -212,8 +212,10 @@ static bool uf_hashmap_insert_map(UfHashmap *self, uint32_t hash, void *key, voi
 
         /* Displace an existing node */
         if (uf_unlikely(candidate != NULL)) {
-                if (self->free.key) {
+                if (uf_likely(self->free.key != NULL)) {
                         self->free.key(candidate->key);
+                }
+                if (uf_likely(self->free.value != NULL)) {
                         self->free.value(candidate->value);
                 }
                 goto insert_bucket;
