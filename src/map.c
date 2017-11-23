@@ -201,10 +201,7 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
                         self->free.key(candidate->key);
                         self->free.value(candidate->value);
                 }
-                candidate->hash = hash ^ UF_KEY_SET;
-                candidate->key = key;
-                candidate->value = value;
-                return true;
+                goto insert_bucket;
         }
 
         /* Construct a new input node */
@@ -213,13 +210,15 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
                 return false;
         }
 
+        candidate->next = bucket->next;
+        bucket->next = candidate;
+        ++self->buckets.current;
+
+insert_bucket:
         /* Prepend and balance leaf */
         candidate->hash = hash ^ UF_KEY_SET; /* We have something stored. */
         candidate->key = key;
         candidate->value = value;
-        candidate->next = bucket->next;
-        bucket->next = candidate;
-        ++self->buckets.current;
 
         return true;
 }
