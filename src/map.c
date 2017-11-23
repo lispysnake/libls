@@ -24,15 +24,21 @@ typedef struct UfHashmapNode UfHashmapNode;
 #define UF_HASH_INITIAL_SIZE 128
 
 /**
+ * 60% = full hashmap from our perspective.
+ */
+#define UF_HASH_FILL_RATE 0.6
+
+/**
  * Opaque UfHashmap implementation, simply an organised header for the
  * function pointers, state and buckets.
  */
 struct UfHashmap {
         struct {
-                UfHashmapNode *blob;  /**<Contiguous blob of buckets, over-commits */
-                unsigned int max;     /**<How many buckets are currently allocated? */
-                unsigned int current; /**<How many items do we currently have? */
-                unsigned int mask;    /**< pow2 n_buckets - 1 */
+                UfHashmapNode *blob;      /**<Contiguous blob of buckets, over-commits */
+                unsigned int max;         /**<How many buckets are currently allocated? */
+                unsigned int current;     /**<How many items do we currently have? */
+                unsigned int mask;        /**< pow2 n_buckets - 1 */
+                unsigned int next_resize; /**<At what point do we perform resize? */
         } buckets;
         struct {
                 uf_hashmap_hash_func hash;     /**<Key hash generator */
@@ -74,6 +80,7 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
                 .buckets.current = 0,
                 .buckets.max = UF_HASH_INITIAL_SIZE,
                 .buckets.mask = UF_HASH_INITIAL_SIZE - 1,
+                .buckets.next_resize = (int)(((double)UF_HASH_INITIAL_SIZE) * UF_HASH_FILL_RATE),
         };
 
         /* Some things we actually do need, sorry programmer. */
