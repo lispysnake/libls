@@ -51,6 +51,7 @@ struct UfHashmap {
 struct UfHashmapNode {
         void *key;
         void *value;
+        uint32_t hash;
 };
 
 UfHashmap *uf_hashmap_new(uf_hashmap_hash_func hash, uf_hashmap_equal_func compare)
@@ -116,14 +117,15 @@ uint32_t uf_hashmap_simple_hash(const void *v)
 /**
  * Find the base bucket to work from
  */
-static inline UfHashmapNode *uf_hashmap_initial_bucket(UfHashmap *self, void *key)
+static inline UfHashmapNode *uf_hashmap_initial_bucket(UfHashmap *self, uint32_t hash)
 {
-        return &self->buckets.blob[self->key.hash(key) & self->buckets.mask];
+        return &self->buckets.blob[hash & self->buckets.mask];
 }
 
 bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
 {
         UfHashmapNode *bucket = NULL;
+        uint32_t hash;
 
         if (uf_unlikely(!self)) {
                 return false;
@@ -134,8 +136,17 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
                 return false;
         }
 
+        hash = self->key.hash(key);
+
         /* Cheat for now. Soon, we need to handle collisions */
-        bucket = uf_hashmap_initial_bucket(self, key);
+        bucket = uf_hashmap_initial_bucket(self, hash);
+
+        /* cheating, i know. */
+        if (bucket->hash) {
+                return false;
+        }
+
+        bucket->hash = hash;
         bucket->key = key;
         bucket->value = value;
 
@@ -145,13 +156,16 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
 void *uf_hashmap_get(UfHashmap *self, void *key)
 {
         UfHashmapNode *bucket = NULL;
+        uint32_t hash;
 
         if (uf_unlikely(!self)) {
                 return NULL;
         }
 
+        hash = self->key.hash(key);
+
         /* Cheat for now. Soon, we need to handle collisions */
-        bucket = uf_hashmap_initial_bucket(self, key);
+        bucket = uf_hashmap_initial_bucket(self, hash);
         if (!self->key.compare(bucket->key, key)) {
                 return NULL;
         }

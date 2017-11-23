@@ -25,7 +25,7 @@ int main(__uf_unused__ int argc, __uf_unused__ char **argv)
                 return EXIT_FAILURE;
         }
 
-        for (int i = 1; i < 50; i++) {
+        for (int i = 1; i < 500; i++) {
                 const void *ret = NULL;
                 if (!uf_hashmap_put(map, UF_INT_TO_PTR(i), UF_INT_TO_PTR(i))) {
                         fprintf(stderr, "Storage failed\n");
