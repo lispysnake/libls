@@ -31,6 +31,7 @@ struct UfHashmap {
         UfHashmapNode *buckets; /**<Contiguous blob of buckets, over-commits */
         int n_buckets;          /**<How many buckets are currently allocated? */
         int n_elements;         /**<How many items do we currently have? */
+        unsigned int root_mask; /**< pow2 n_buckets - 1 */
 
         struct {
                 uf_hashmap_hash_func key;    /**<Key hash generator */
@@ -66,6 +67,9 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
                 .hash.value = compare,
                 .free.key = key_free,
                 .free.value = value_free,
+                .n_buckets = UF_HASH_INITIAL_SIZE,
+                .n_elements = 0,
+                .root_mask = UF_HASH_INITIAL_SIZE - 1,
         };
 
         /* Some things we actually do need, sorry programmer. */
@@ -107,6 +111,45 @@ uint32_t uf_hashmap_simple_hash(const void *v)
         return (uint32_t)((uintptr_t)(v));
 }
 
+/**
+ * Find the base bucket to work from
+ */
+static inline UfHashmapNode *uf_hashmap_initial_bucket(UfHashmap *self, void *key)
+{
+        return &self->buckets[self->hash.key(key) & self->root_mask];
+}
+
+bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
+{
+        UfHashmapNode *bucket = NULL;
+
+        if (uf_unlikely(!self)) {
+                return false;
+        }
+
+        /* Cheat for now. Soon, we need to handle collisions */
+        bucket = uf_hashmap_initial_bucket(self, key);
+        bucket->key = key;
+        bucket->value = value;
+
+        return true;
+}
+
+void *uf_hashmap_get(UfHashmap *self, void *key)
+{
+        UfHashmapNode *bucket = NULL;
+
+        if (uf_unlikely(!self)) {
+                return NULL;
+        }
+
+        /* Cheat for now. Soon, we need to handle collisions */
+        bucket = uf_hashmap_initial_bucket(self, key);
+        if (!self->hash.value(bucket->key, key)) {
+                return NULL;
+        }
+        return bucket->value;
+}
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
  *

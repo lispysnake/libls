@@ -86,6 +86,28 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
  */
 void uf_hashmap_free(UfHashmap *map);
 
+/**
+ * Store a key/value mapping within the map
+ *
+ * @note This will not copy the key or value. Do this before insert
+ *
+ * @param map Pointer to a valid UfHashmap instance
+ * @param key Key for the new mapping
+ * @param value Value for the new mapping
+ *
+ * @returns True if the key/value pair could be stored
+ */
+bool uf_hashmap_put(UfHashmap *map, void *key, void *b);
+
+/**
+ * Attempt to retrieve the value from the map associated with @key
+ *
+ * @param map Pointer to an allocated map
+ *
+ * @returns The stored value, if found.
+ */
+void *uf_hashmap_get(UfHashmap *map, void *key);
+
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
  *
