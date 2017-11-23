@@ -169,6 +169,32 @@ uint32_t uf_hashmap_simple_hash(const void *v)
         return UF_PTR_TO_INT(v) + 1;
 }
 
+bool uf_hashmap_string_equal(const void *a, const void *b)
+{
+        if (!a || !b) {
+                return false;
+        }
+        return strcmp((const char *)a, (const char *)b) == 0;
+}
+
+/**
+ * Currently this is just a version of the well known DJB hash so that
+ * I can do some direct fair comparisons with the old libnica hashmap
+ * that isn't skewed by the hash being different.
+ *
+ * This will be replaced by a more efficient version soon.
+ */
+uint32_t uf_hashmap_string_hash(const void *v)
+{
+        unsigned int hash = 5381;
+        const signed char *c = v;
+
+        for (; *c != '\0'; c++) {
+                hash = (hash << 5) + hash + (unsigned int)*c;
+        }
+        return (uint32_t)hash;
+}
+
 /**
  * Find the base bucket to work from
  */

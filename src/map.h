@@ -53,6 +53,16 @@ bool uf_hashmap_simple_equal(const void *a, const void *b);
 uint32_t uf_hashmap_simple_hash(const void *v);
 
 /**
+ * Comparison for string keys
+ */
+bool uf_hashmap_string_equal(const void *a, const void *b);
+
+/**
+ * Slow hash for string keys
+ */
+uint32_t uf_hashmap_string_hash(const void *v);
+
+/**
  * Construct a new UfHashmap with the given @hash and @compare functions.
  *
  * @param hash A hash generator function
