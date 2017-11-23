@@ -51,6 +51,8 @@ typedef struct UfHashmapNode UfHashmapNode;
 static void uf_hashmap_from(UfHashmap *map, UfHashmap *target);
 static bool uf_hashmap_resize(UfHashmap *self);
 static bool uf_hashmap_insert_map(UfHashmap *self, uint32_t hash, void *key, void *value);
+static UfHashmapNode *uf_hashmap_get_node(UfHashmap *self, void *key);
+
 /**
  * Opaque UfHashmap implementation, simply an organised header for the
  * function pointers, state and buckets.
@@ -263,25 +265,39 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
         return uf_hashmap_insert_map(self, hash, key, value);
 }
 
-void *uf_hashmap_get(UfHashmap *self, void *key)
+/**
+ * Find the parent node for a key and return it
+ */
+static UfHashmapNode *uf_hashmap_get_node(UfHashmap *self, void *key)
 {
         UfHashmapNode *bucket = NULL;
         uint32_t hash;
-
-        if (uf_unlikely(!self)) {
-                return NULL;
-        }
 
         hash = self->key.hash(key);
         bucket = uf_hashmap_initial_bucket(self, hash);
 
         for (UfHashmapNode *node = bucket; node; node = node->next) {
                 if (self->key.compare(node->key, key)) {
-                        return node->value;
+                        return node;
                 }
         }
 
         return NULL;
+}
+
+void *uf_hashmap_get(UfHashmap *self, void *key)
+{
+        UfHashmapNode *node = NULL;
+
+        if (uf_unlikely(!self)) {
+                return NULL;
+        }
+
+        node = uf_hashmap_get_node(self, key);
+        if (uf_unlikely(!node)) {
+                return NULL;
+        }
+        return node->value;
 }
 
 static void uf_hashmap_from(UfHashmap *source, UfHashmap *target)
