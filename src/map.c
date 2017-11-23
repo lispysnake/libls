@@ -352,6 +352,34 @@ failed:
         return false;
 }
 
+bool uf_hashmap_remove(UfHashmap *self, void *key)
+{
+        UfHashmapNode *node = NULL;
+
+        if (uf_unlikely(!self)) {
+                return false;
+        }
+
+        node = uf_hashmap_get_node(self, key);
+        if (uf_unlikely(!node)) {
+                return false;
+        }
+
+        if (uf_likely(self->free.key != NULL)) {
+                self->free.key(node->key);
+        }
+        if (uf_likely(self->free.value != NULL)) {
+                self->free.value(node->value);
+        }
+
+        node->key = NULL;
+        node->value = NULL;
+        /* Ensure we reset hash so that we can reclaim this guy */
+        node->hash = 0;
+
+        return true;
+}
+
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
  *

@@ -108,6 +108,16 @@ bool uf_hashmap_put(UfHashmap *map, void *key, void *b);
  */
 void *uf_hashmap_get(UfHashmap *map, void *key);
 
+/**
+ * Remove key from the map that matches the given key
+ *
+ * @param map Pointer to an allocated map
+ * @param key Key to lookup a value for
+ *
+ * @returns True if we deleted a matching key/value
+ */
+bool uf_hashmap_remove(UfHashmap *map, void *key);
+
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
  *
