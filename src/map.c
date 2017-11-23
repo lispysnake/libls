@@ -30,15 +30,6 @@ typedef struct UfHashmapNode UfHashmapNode;
 #define UF_HASH_FILL_RATE 0.6
 
 /**
- * Instead of forcing a new field to account for NULL/0 glibc issues, we simply
- * always apply this mask to the hash field upon storage.
- *
- * This effectively acts as a cheap tombstone mechanism by flagging the key
- * within a Thing.
- */
-#define UF_KEY_SET 0x000001
-
-/**
  * Grow by a factor of 4, first regrowth takes us to 512, then 2048, etc.
  * This helps with distribution and maintains ^2 constraint.
  */
@@ -172,7 +163,10 @@ bool uf_hashmap_simple_equal(const void *a, const void *b)
 
 uint32_t uf_hashmap_simple_hash(const void *v)
 {
-        return UF_PTR_TO_INT(v);
+        /* because NULL == 0 - we always increment the hash by one.
+         * this ensures no special handling is required for "is a hash set
+         */
+        return UF_PTR_TO_INT(v) + 1;
 }
 
 /**
@@ -229,13 +223,13 @@ static bool uf_hashmap_insert_map(UfHashmap *self, uint32_t hash, void *key, voi
                 return false;
         }
 
+        /* Prepend and balance leaf */
         candidate->next = bucket->next;
         bucket->next = candidate;
         ++self->buckets.current;
 
 insert_bucket:
-        /* Prepend and balance leaf */
-        candidate->hash = hash ^ UF_KEY_SET; /* We have something stored. */
+        candidate->hash = hash;
         candidate->key = key;
         candidate->value = value;
 
@@ -333,10 +327,13 @@ static bool uf_hashmap_resize(UfHashmap *self)
         /* Start moving everything across and preserve the hash (no need to rehash) */
         for (unsigned int i = 0; i < self->buckets.max; i++) {
                 for (UfHashmapNode *node = &self->buckets.blob[i]; node; node = node->next) {
-                        if (uf_unlikely(node->hash == 0)) {
+                        uint32_t hash = node->hash;
+
+                        if (uf_unlikely(hash == 0)) {
                                 continue;
                         }
-                        if (!uf_hashmap_insert_map(&target, node->hash, node->key, node->value)) {
+
+                        if (!uf_hashmap_insert_map(&target, hash, node->key, node->value)) {
                                 goto failed;
                         }
                 }
