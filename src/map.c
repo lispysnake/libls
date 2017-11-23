@@ -34,9 +34,9 @@ struct UfHashmap {
         unsigned int root_mask; /**< pow2 n_buckets - 1 */
 
         struct {
-                uf_hashmap_hash_func key;    /**<Key hash generator */
-                uf_hashmap_equal_func value; /**<Key value comparison */
-        } hash;
+                uf_hashmap_hash_func hash;     /**<Key hash generator */
+                uf_hashmap_equal_func compare; /**<Key value comparison */
+        } key;
         struct {
                 uf_hashmap_free_func key;   /**<Key free function */
                 uf_hashmap_free_func value; /**<Value free function */
@@ -63,8 +63,8 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
         UfHashmap *ret = NULL;
 
         UfHashmap clone = {
-                .hash.key = hash,
-                .hash.value = compare,
+                .key.hash = hash,
+                .key.compare = compare,
                 .free.key = key_free,
                 .free.value = value_free,
                 .n_buckets = UF_HASH_INITIAL_SIZE,
@@ -73,8 +73,8 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
         };
 
         /* Some things we actually do need, sorry programmer. */
-        assert(clone.hash.key);
-        assert(clone.hash.value);
+        assert(clone.key.hash);
+        assert(clone.key.compare);
 
         ret = calloc(1, sizeof(struct UfHashmap));
         if (!ret) {
@@ -116,7 +116,7 @@ uint32_t uf_hashmap_simple_hash(const void *v)
  */
 static inline UfHashmapNode *uf_hashmap_initial_bucket(UfHashmap *self, void *key)
 {
-        return &self->buckets[self->hash.key(key) & self->root_mask];
+        return &self->buckets[self->key.hash(key) & self->root_mask];
 }
 
 bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
@@ -145,7 +145,7 @@ void *uf_hashmap_get(UfHashmap *self, void *key)
 
         /* Cheat for now. Soon, we need to handle collisions */
         bucket = uf_hashmap_initial_bucket(self, key);
-        if (!self->hash.value(bucket->key, key)) {
+        if (!self->key.compare(bucket->key, key)) {
                 return NULL;
         }
         return bucket->value;
