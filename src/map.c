@@ -118,22 +118,25 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
         return ret;
 }
 
-static inline void bucket_free(UfHashmap *self, UfHashmapNode *node, bool free_values)
+static inline void bucket_free_one(UfHashmap *self, UfHashmapNode *node)
 {
-        if (!node) {
-                return;
-        }
-        bucket_free(self, node->next, free_values);
-        if (!free_values) {
-                goto node_free;
-        }
         if (self->free.key) {
                 self->free.key(node->key);
         }
         if (self->free.value) {
                 self->free.value(node->value);
         }
-node_free:
+}
+
+static inline void bucket_free(UfHashmap *self, UfHashmapNode *node, bool free_values)
+{
+        if (!node) {
+                return;
+        }
+        bucket_free(self, node->next, free_values);
+        if (free_values) {
+                bucket_free_one(self, node);
+        }
         free(node);
 }
 
@@ -141,6 +144,9 @@ static void uf_hashmap_free_internal(UfHashmap *self, bool free_blobs)
 {
         for (size_t i = 0; i < self->buckets.max; i++) {
                 UfHashmapNode *node = &self->buckets.blob[i];
+                if (free_blobs) {
+                        bucket_free_one(self, node);
+                }
                 bucket_free(self, node->next, free_blobs);
         }
         free(self->buckets.blob);
