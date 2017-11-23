@@ -97,6 +97,16 @@ void uf_hashmap_free(UfHashmap *self)
         return;
 }
 
+bool uf_hashmap_simple_equal(const void *a, const void *b)
+{
+        return a == b;
+}
+
+uint32_t uf_hashmap_simple_hash(const void *v)
+{
+        return (uint32_t)((uintptr_t)(v));
+}
+
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
  *

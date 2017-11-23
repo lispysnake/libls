@@ -43,6 +43,16 @@ typedef uint32_t (*uf_hashmap_hash_func)(const void *v);
 typedef bool (*uf_hashmap_equal_func)(const void *a, const void *b);
 
 /**
+ * Simple comparison for pointer types.
+ */
+bool uf_hashmap_simple_equal(const void *a, const void *b);
+
+/**
+ * Simple hash for pointer types.
+ */
+uint32_t uf_hashmap_simple_hash(const void *v);
+
+/**
  * Construct a new UfHashmap with the given @hash and @compare functions.
  *
  * @param hash A hash generator function

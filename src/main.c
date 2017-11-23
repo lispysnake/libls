@@ -19,7 +19,7 @@ int main(__uf_unused__ int argc, __uf_unused__ char **argv)
 {
         UfHashmap *map = NULL;
 
-        map = uf_hashmap_new(NULL, NULL);
+        map = uf_hashmap_new(uf_hashmap_simple_hash, uf_hashmap_simple_equal);
         if (!map) {
                 return EXIT_FAILURE;
         }

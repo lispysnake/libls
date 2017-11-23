@@ -32,6 +32,14 @@
 #define __uf_unused__ __attribute__((unused))
 #endif
 
+#ifndef UF_PTR_TO_INT
+#define UF_PTR_TO_INT(x) ((unsigned int)((uintptr_t)(x)))
+#endif
+
+#ifndef UF_INT_TO_PTR
+#define UF_INT_TO_PTR(x) ((void *)((uintptr_t)x))
+#endif
+
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
  *
