@@ -25,17 +25,13 @@ int main(__uf_unused__ int argc, __uf_unused__ char **argv)
                 return EXIT_FAILURE;
         }
 
-        for (int i = 1; i < 500; i++) {
+        for (int i = 0; i < 500; i++) {
                 const void *ret = NULL;
                 if (!uf_hashmap_put(map, UF_INT_TO_PTR(i), UF_INT_TO_PTR(i))) {
                         fprintf(stderr, "Storage failed\n");
                         goto end;
                 }
                 ret = uf_hashmap_get(map, UF_INT_TO_PTR(i));
-                if (!ret) {
-                        fprintf(stderr, "Return failed\n");
-                        goto end;
-                }
                 int r = (int)UF_PTR_TO_INT(ret);
                 if (r != i) {
                         fprintf(stderr, "No match! Got %d expected %d\n", r, i);

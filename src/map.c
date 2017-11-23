@@ -134,7 +134,7 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
 
         /* Ensure we have at least key *and* value together */
         if (uf_unlikely(!key && !value)) {
-                return false;
+                return true;
         }
 
         hash = self->key.hash(key);
