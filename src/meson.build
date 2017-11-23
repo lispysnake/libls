@@ -1,7 +1,6 @@
 # Create the main library
 
 libuf_sources = [
-    'core.c',
     'map.c',
 ]
 
