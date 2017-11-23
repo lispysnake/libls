@@ -28,11 +28,12 @@ typedef struct UfHashmapNode UfHashmapNode;
  * function pointers, state and buckets.
  */
 struct UfHashmap {
-        UfHashmapNode *buckets; /**<Contiguous blob of buckets, over-commits */
-        int n_buckets;          /**<How many buckets are currently allocated? */
-        int n_elements;         /**<How many items do we currently have? */
-        unsigned int root_mask; /**< pow2 n_buckets - 1 */
-
+        struct {
+                UfHashmapNode *blob;  /**<Contiguous blob of buckets, over-commits */
+                unsigned int max;     /**<How many buckets are currently allocated? */
+                unsigned int current; /**<How many items do we currently have? */
+                unsigned int mask;    /**< pow2 n_buckets - 1 */
+        } buckets;
         struct {
                 uf_hashmap_hash_func hash;     /**<Key hash generator */
                 uf_hashmap_equal_func compare; /**<Key value comparison */
@@ -67,9 +68,10 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
                 .key.compare = compare,
                 .free.key = key_free,
                 .free.value = value_free,
-                .n_buckets = UF_HASH_INITIAL_SIZE,
-                .n_elements = 0,
-                .root_mask = UF_HASH_INITIAL_SIZE - 1,
+                .buckets.blob = NULL,
+                .buckets.current = 0,
+                .buckets.max = UF_HASH_INITIAL_SIZE,
+                .buckets.mask = UF_HASH_INITIAL_SIZE - 1,
         };
 
         /* Some things we actually do need, sorry programmer. */
@@ -82,8 +84,8 @@ UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func 
         }
         *ret = clone;
 
-        ret->buckets = calloc(UF_HASH_INITIAL_SIZE, sizeof(struct UfHashmapNode));
-        if (!ret->buckets) {
+        ret->buckets.blob = calloc((size_t)clone.buckets.max, sizeof(struct UfHashmapNode));
+        if (!ret->buckets.blob) {
                 uf_hashmap_free(ret);
                 return NULL;
         }
@@ -96,7 +98,7 @@ void uf_hashmap_free(UfHashmap *self)
         if (uf_unlikely(!self)) {
                 return;
         }
-        free(self->buckets);
+        free(self->buckets.blob);
         free(self);
         return;
 }
@@ -116,7 +118,7 @@ uint32_t uf_hashmap_simple_hash(const void *v)
  */
 static inline UfHashmapNode *uf_hashmap_initial_bucket(UfHashmap *self, void *key)
 {
-        return &self->buckets[self->key.hash(key) & self->root_mask];
+        return &self->buckets.blob[self->key.hash(key) & self->buckets.mask];
 }
 
 bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
