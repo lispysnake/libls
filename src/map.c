@@ -129,6 +129,11 @@ bool uf_hashmap_put(UfHashmap *self, void *key, void *value)
                 return false;
         }
 
+        /* Ensure we have at least key *and* value together */
+        if (uf_unlikely(!key && !value)) {
+                return false;
+        }
+
         /* Cheat for now. Soon, we need to handle collisions */
         bucket = uf_hashmap_initial_bucket(self, key);
         bucket->key = key;
