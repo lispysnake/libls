@@ -21,3 +21,11 @@ link_libuf = declare_dependency(
         include_directories('.'),
     ],
 )
+
+
+test_bin = executable(
+    'demo',
+    sources: ['main.c'],
+    dependencies: [link_libuf],
+    install: false,
+)
