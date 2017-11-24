@@ -19,10 +19,10 @@
 typedef struct UfHashmapNode UfHashmapNode;
 
 /**
- * Initial size of 128 items. Slight overcommit but prevents too much future
+ * Initial size of 256 items. Slight overcommit but prevents too much future
  * growth as our growth ratio and algorithm is ^2 based.
  */
-#define UF_HASH_INITIAL_SIZE 128
+#define UF_HASH_INITIAL_SIZE 256
 
 /**
  * 60% = full hashmap from our perspective.
@@ -41,7 +41,7 @@ typedef struct UfHashmapNode UfHashmapNode;
  */
 static void uf_hashmap_from(UfHashmap *map, UfHashmap *target);
 static bool uf_hashmap_resize(UfHashmap *self);
-static bool uf_hashmap_insert_map(UfHashmap *self, uint32_t hash, void *key, void *value);
+static bool uf_hashmap_insert_map(UfHashmap *self, const uint32_t hash, void *key, void *value);
 static UfHashmapNode *uf_hashmap_get_node(UfHashmap *self, void *key);
 
 /**
@@ -193,18 +193,19 @@ bool uf_hashmap_string_equal(const void *a, const void *b)
 uint32_t uf_hashmap_string_hash(const void *v)
 {
         unsigned int hash = 5381;
-        const signed char *c = v;
+        const signed char *c;
 
-        for (; *c != '\0'; c++) {
-                hash = (hash << 5) + hash + (unsigned int)*c;
+        for (c = v; *c != '\0'; c++) {
+                hash = (hash << 5) + hash + (unsigned)*c;
         }
+
         return (uint32_t)hash;
 }
 
 /**
  * Find the base bucket to work from
  */
-static inline UfHashmapNode *uf_hashmap_initial_bucket(UfHashmap *self, uint32_t hash)
+static inline UfHashmapNode *uf_hashmap_initial_bucket(UfHashmap *self, const uint32_t hash)
 {
         return &self->buckets.blob[hash & self->buckets.mask];
 }
@@ -213,7 +214,7 @@ static inline UfHashmapNode *uf_hashmap_initial_bucket(UfHashmap *self, uint32_t
  * Internal insert helper, will never attempt a resize, as that is only handled
  * by the public API.
  */
-static bool uf_hashmap_insert_map(UfHashmap *self, uint32_t hash, void *key, void *value)
+static bool uf_hashmap_insert_map(UfHashmap *self, const uint32_t hash, void *key, void *value)
 {
         UfHashmapNode *bucket = NULL;
         UfHashmapNode *candidate = NULL;
@@ -224,29 +225,27 @@ static bool uf_hashmap_insert_map(UfHashmap *self, uint32_t hash, void *key, voi
         for (UfHashmapNode *node = bucket; node; node = node->next) {
                 /* Root node isn't occupied */
                 if (node->hash == 0) {
-                        candidate = node;
                         /* We have more buckets used now */
-                        ++self->buckets.current;
-                        break;
+                        self->buckets.current++;
+                        node->hash = hash;
+                        node->key = key;
+                        node->value = value;
+                        return true;
                 }
 
                 /* Attempt to find dupe */
                 if (uf_unlikely(self->key.compare(node->key, key))) {
-                        candidate = node;
-                        /* Replacing a bucket, no diff in count */
-                        break;
+                        if (uf_likely(self->free.key != NULL)) {
+                                self->free.key(node->key);
+                        }
+                        if (uf_likely(self->free.value != NULL)) {
+                                self->free.value(node->value);
+                        }
+                        node->hash = hash;
+                        node->key = key;
+                        node->value = value;
+                        return true;
                 }
-        }
-
-        /* Displace an existing node */
-        if (uf_unlikely(candidate != NULL)) {
-                if (uf_likely(self->free.key != NULL)) {
-                        self->free.key(candidate->key);
-                }
-                if (uf_likely(self->free.value != NULL)) {
-                        self->free.value(candidate->value);
-                }
-                goto insert_bucket;
         }
 
         /* Construct a new input node */
@@ -258,9 +257,7 @@ static bool uf_hashmap_insert_map(UfHashmap *self, uint32_t hash, void *key, voi
         /* Prepend and balance leaf */
         candidate->next = bucket->next;
         bucket->next = candidate;
-        ++self->buckets.current;
-
-insert_bucket:
+        self->buckets.current++;
         candidate->hash = hash;
         candidate->key = key;
         candidate->value = value;
@@ -303,7 +300,7 @@ static UfHashmapNode *uf_hashmap_get_node(UfHashmap *self, void *key)
         bucket = uf_hashmap_initial_bucket(self, hash);
 
         for (UfHashmapNode *node = bucket; node; node = node->next) {
-                if (self->key.compare(node->key, key)) {
+                if (node->hash != 0 && self->key.compare(node->key, key)) {
                         return node;
                 }
         }
