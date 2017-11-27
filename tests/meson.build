@@ -1,7 +1,7 @@
 # Contains definitions for all of our tests
 
 required_tests = [
-    'core',
+    'map',
 ]
 
 # Just need libuf, self contained.
