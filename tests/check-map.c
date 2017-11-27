@@ -12,6 +12,33 @@
 #include <check.h>
 #include <stdlib.h>
 
+#include "map.h"
+#include "util.h"
+
+START_TEST(test_map_simple)
+{
+        UfHashmap *map = NULL;
+        void *v = NULL;
+
+        map = uf_hashmap_new(uf_hashmap_string_hash, uf_hashmap_string_equal);
+        fail_if(!map, "Failed to construct string hashmap!");
+
+        fail_if(!uf_hashmap_put(map, "charlie", UF_INT_TO_PTR(12)), "Failed to insert");
+        fail_if(!uf_hashmap_put(map, "bob", UF_INT_TO_PTR(38)), "Failed to insert");
+
+        v = uf_hashmap_get(map, "charlie");
+        fail_if(!v, "Failed to get charlie");
+        fail_if(UF_PTR_TO_INT(v) != 12, "Retrieved value is incorrect");
+        v = NULL;
+
+        v = uf_hashmap_get(map, "bob");
+        fail_if(!v, "Failed to get bob");
+        fail_if(UF_PTR_TO_INT(v) != 38, "Retrieved value is incorrect");
+
+        uf_hashmap_free(map);
+}
+END_TEST
+
 /**
  * Standard helper for running a test suite
  */
@@ -36,6 +63,8 @@ static Suite *test_create(void)
         s = suite_create(__FILE__);
         tc = tcase_create(__FILE__);
         suite_add_tcase(s, tc);
+
+        tcase_add_test(tc, test_map_simple);
 
         /* TODO: Add actual tests. */
         return s;
