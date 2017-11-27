@@ -77,5 +77,7 @@ report = [
     '    enable tests:                           @0@'.format(with_tests),
 ]
 
-# Output some stuff to validate the build config
-message('\n\n\n' + '\n'.join(report) + '\n\n')
+if meson.is_subproject() == false
+    # Output some stuff to validate the build config
+    message('\n\n\n' + '\n'.join(report) + '\n\n')
+endif
