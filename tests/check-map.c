@@ -68,6 +68,70 @@ START_TEST(test_map_null_zero)
 END_TEST
 
 /**
+ * Very nasty test that tries to brute force the map into crippling.
+ *
+ * We'll insert a 1000 allocated values, knowing we'll force both collisions
+ * in the map and resizes.
+ * We'll remove 200 elements from the final map, and make sure that within the
+ * current scope they're really gone (link buggery).
+ *
+ * We'll finally run over them again and check they did indeed get nuked, in
+ * a single cycle after the removals, to ensure we've not been tricked by
+ * some broken tombstone in the list mechanism.
+ *
+ * Finally, we free the map with our constructor free function, and any values
+ * left would cause valgrind to scream very very loudly.
+ */
+START_TEST(test_map_remove)
+{
+        UfHashmap *map = NULL;
+
+        /* Construct hashmap like test_map_null_zero but remove elements */
+        map = uf_hashmap_new_full(uf_hashmap_simple_hash, uf_hashmap_simple_equal, NULL, free);
+        fail_if(!map, "Failed to construct hashmap");
+
+        for (size_t i = 0; i < 1000; i++) {
+                char *p = NULL;
+                if (asprintf(&p, "VALUE: %ld", i) < 0) {
+                        abort();
+                }
+                fail_if(!uf_hashmap_put(map, UF_INT_TO_PTR(i), p), "Failed to insert keypair");
+        }
+
+        /* Remove and check at time of removal they're really gone. */
+        for (size_t i = 500; i < 700; i++) {
+                void *v = NULL;
+                char *p = NULL;
+                if (asprintf(&p, "VALUE: %ld", i) < 0) {
+                        abort();
+                }
+
+                v = uf_hashmap_get(map, UF_INT_TO_PTR(i));
+                fail_if(!v, "Key doesn't actually exist!");
+                fail_if(strcmp(v, p) != 0, "Key in map is wrong!");
+                free(p);
+                v = NULL;
+
+                fail_if(!uf_hashmap_remove(map, UF_INT_TO_PTR(i)), "Failed to remove keypair");
+
+                v = uf_hashmap_get(map, UF_INT_TO_PTR(i));
+                fail_if(v != NULL, "Key should not longer exist in map!");
+        }
+
+        /* Now go check they all did disappear and it wasn't a list link fluke */
+        for (size_t i = 500; i < 700; i++) {
+                void *v = NULL;
+
+                v = uf_hashmap_get(map, UF_INT_TO_PTR(i));
+                fail_if(v != NULL, "Key should not longer exist in map!");
+        }
+
+        /* Valgrind test would scream here if the list is broken */
+        uf_hashmap_free(map);
+}
+END_TEST
+
+/**
  * Standard helper for running a test suite
  */
 static int uf_test_run(Suite *suite)
@@ -94,6 +158,7 @@ static Suite *test_create(void)
 
         tcase_add_test(tc, test_map_simple);
         tcase_add_test(tc, test_map_null_zero);
+        tcase_add_test(tc, test_map_remove);
 
         /* TODO: Add actual tests. */
         return s;
