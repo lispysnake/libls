@@ -23,6 +23,16 @@ or copy thereof..
 
 Not a lot to look at right now, check back later.
 
+Current priority is to provide some lower foundational elements for some
+ongoing Solus projects, like usysconf.
+
+## TODO
+
+ - [ ] Finish up map APIs (add steal/2 style methods and iterators)
+ - [ ] Add singly + doubly linked lists
+ - [ ] Add helpful filesystem API stuff (stat wrappers and copiers, etc.)
+ - [ ] Add C11 thread pool mechanism
+
 ### Authors
 
 Copyright © 2017 Ikey Doherty
