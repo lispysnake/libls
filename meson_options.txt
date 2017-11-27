@@ -1,1 +1,2 @@
 option('with-tests', type: 'boolean', value: 'true', description: 'Enable the test suite (recommended)')
+option('with-static', type: 'boolean', value: 'false', description: 'Only build a static library')
