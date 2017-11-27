@@ -9,7 +9,10 @@
  * version 2.1 of the License, or (at your option) any later version.
  */
 
+#define _GNU_SOURCE
+
 #include <check.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "map.h"
@@ -34,6 +37,31 @@ START_TEST(test_map_simple)
         v = uf_hashmap_get(map, "bob");
         fail_if(!v, "Failed to get bob");
         fail_if(UF_PTR_TO_INT(v) != 38, "Retrieved value is incorrect");
+
+        uf_hashmap_free(map);
+}
+END_TEST
+
+START_TEST(test_map_null_zero)
+{
+        UfHashmap *map = NULL;
+        char *ret = NULL;
+
+        /* Construct hashmap of int to string value to check null key */
+        map = uf_hashmap_new_full(uf_hashmap_simple_hash, uf_hashmap_simple_equal, NULL, free);
+        fail_if(!map, "Failed to construct hashmap");
+
+        for (size_t i = 0; i < 1000; i++) {
+                char *p = NULL;
+                if (asprintf(&p, "VALUE: %ld", i) < 0) {
+                        abort();
+                }
+                fail_if(!uf_hashmap_put(map, UF_INT_TO_PTR(i), p), "Failed to insert keypair");
+        }
+
+        ret = uf_hashmap_get(map, UF_INT_TO_PTR(0));
+        fail_if(!ret, "Failed to retrieve key 0 (glibc NULL)");
+        fail_if(strcmp(ret, "VALUE: 0") != 0, "Returned string is incorrect");
 
         uf_hashmap_free(map);
 }
@@ -65,6 +93,7 @@ static Suite *test_create(void)
         suite_add_tcase(s, tc);
 
         tcase_add_test(tc, test_map_simple);
+        tcase_add_test(tc, test_map_null_zero);
 
         /* TODO: Add actual tests. */
         return s;
