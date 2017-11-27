@@ -7,6 +7,7 @@ libuf_sources = [
 libuf = library('uf',
     sources: libuf_sources,
     version: abi_version,
+    c_args: am_cflags,
     include_directories: [
         config_h_dir,
         include_directories('.'),

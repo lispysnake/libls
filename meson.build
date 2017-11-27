@@ -39,9 +39,6 @@ am_cflags = [
     '-W',
 ]
 
-# Add our main flags
-add_global_arguments(am_cflags, language: 'c')
-
 # Get configuration bits together
 path_prefix = get_option('prefix')
 path_sysconfdir = join_paths(path_prefix, get_option('sysconfdir'))

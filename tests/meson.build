@@ -17,6 +17,7 @@ foreach test : required_tests
         sources: [
             'check-@0@.c'.format(test),
         ],
+        c_args: am_cflags,
         dependencies: test_dependencies,
         install: false,
     )
