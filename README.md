@@ -35,6 +35,6 @@ ongoing Solus projects, like usysconf.
 
 ### Authors
 
-Copyright © 2017 Ikey Doherty
+Copyright © 2017-2018 Ikey Doherty
 
 libuf is available under the terms of the LGPL-2.1 license.
