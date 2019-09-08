@@ -3,7 +3,7 @@ project(
     ['c'],
     version: '0.0.0',
     license: [
-        'GPL-2.0',
+        'ZLib',
     ],
     default_options: [
         'c_std=c11',

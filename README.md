@@ -1,40 +1,20 @@
 # libuf
 
-General purpose C library. I have a number of C projects in transit that are
-starting to gain much commonality, so it is high time they all got bundled
-into one place.
+Replacement to the defunct [libuf]() project, to provide helpful C APIs
+to portable programs not looking for a heavy library to link to.
+Primary target is our game engine.
 
-Long story short, the use case is "I need to build a C thing, but glib2 is too
-heavy". Invariably this is a very low level component or long running daemon
-process, or indeed something that execve's after bootstrap.
-
-Primarily this is arising out of my Valgrind OCD and as a spiritual successor
-to the much older [libnica](https://github.com/intel/libnica).
-
-The focus will be C11 and portability, and ensuring we're sane to use outside
-of glibc, i.e. with musl for some of the static binary projects within Solus.
-
-Several shortcomings will be address, namely having a sane ABI for dynamic
-linking, as well as performance and compliance (not-insane INI parser..)
-
-This will hopefully contain the last INI parser I ever have to write, too, so
-it can be repurposed into every single project using some custom hacky parsers
-or copy thereof..
-
-Not a lot to look at right now, check back later.
-
-Current priority is to provide some lower foundational elements for some
-ongoing Solus projects, like usysconf.
+Relicensed under `ZLib` license with permission from sole author at time of
+fork, Ikey Doherty. This relicensing effort is designed to help authors
+integrate into their existing projects.
 
 ## TODO
 
- - [ ] Finish up map APIs (add steal/2 style methods and iterators)
- - [ ] Add singly + doubly linked lists
- - [ ] Add helpful filesystem API stuff (stat wrappers and copiers, etc.)
- - [ ] Add C11 thread pool mechanism
-
+ - [ ] Cleanup!
+ 
 ### Authors
 
 Copyright © 2017-2018 Ikey Doherty
+Copyright 2019 Lispy Snake, Ltd.
 
-libuf is available under the terms of the LGPL-2.1 license.
+libuf is available under the terms of the ZLib license.
