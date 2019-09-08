@@ -1,5 +1,5 @@
 /*
- * This file is part of libuf.
+ * This file is part of libls.
  *
  * Copyright (c) 2017-2018 Ikey Doherty
  * Copyright (c) 2019 Lispy Snake, Ltd.
@@ -32,35 +32,35 @@
 
 START_TEST(test_map_simple)
 {
-        UfHashmap *map = NULL;
+        LsHashmap *map = NULL;
         void *v = NULL;
 
-        map = uf_hashmap_new(uf_hashmap_string_hash, uf_hashmap_string_equal);
+        map = ls_hashmap_new(ls_hashmap_string_hash, ls_hashmap_string_equal);
         fail_if(!map, "Failed to construct string hashmap!");
 
-        fail_if(!uf_hashmap_put(map, "charlie", UF_INT_TO_PTR(12)), "Failed to insert");
-        fail_if(!uf_hashmap_put(map, "bob", UF_INT_TO_PTR(38)), "Failed to insert");
+        fail_if(!ls_hashmap_put(map, "charlie", LS_INT_TO_PTR(12)), "Failed to insert");
+        fail_if(!ls_hashmap_put(map, "bob", LS_INT_TO_PTR(38)), "Failed to insert");
 
-        v = uf_hashmap_get(map, "charlie");
+        v = ls_hashmap_get(map, "charlie");
         fail_if(!v, "Failed to get charlie");
-        fail_if(UF_PTR_TO_INT(v) != 12, "Retrieved value is incorrect");
+        fail_if(LS_PTR_TO_INT(v) != 12, "Retrieved value is incorrect");
         v = NULL;
 
-        v = uf_hashmap_get(map, "bob");
+        v = ls_hashmap_get(map, "bob");
         fail_if(!v, "Failed to get bob");
-        fail_if(UF_PTR_TO_INT(v) != 38, "Retrieved value is incorrect");
+        fail_if(LS_PTR_TO_INT(v) != 38, "Retrieved value is incorrect");
 
-        uf_hashmap_free(map);
+        ls_hashmap_free(map);
 }
 END_TEST
 
 START_TEST(test_map_null_zero)
 {
-        UfHashmap *map = NULL;
+        LsHashmap *map = NULL;
         char *ret = NULL;
 
         /* Construct hashmap of int to string value to check null key */
-        map = uf_hashmap_new_full(uf_hashmap_simple_hash, uf_hashmap_simple_equal, NULL, free);
+        map = ls_hashmap_new_full(ls_hashmap_simple_hash, ls_hashmap_simple_equal, NULL, free);
         fail_if(!map, "Failed to construct hashmap");
 
         for (size_t i = 0; i < 1000; i++) {
@@ -68,14 +68,14 @@ START_TEST(test_map_null_zero)
                 if (asprintf(&p, "VALUE: %ld", i) < 0) {
                         abort();
                 }
-                fail_if(!uf_hashmap_put(map, UF_INT_TO_PTR(i), p), "Failed to insert keypair");
+                fail_if(!ls_hashmap_put(map, LS_INT_TO_PTR(i), p), "Failed to insert keypair");
         }
 
-        ret = uf_hashmap_get(map, UF_INT_TO_PTR(0));
+        ret = ls_hashmap_get(map, LS_INT_TO_PTR(0));
         fail_if(!ret, "Failed to retrieve key 0 (glibc NULL)");
         fail_if(strcmp(ret, "VALUE: 0") != 0, "Returned string is incorrect");
 
-        uf_hashmap_free(map);
+        ls_hashmap_free(map);
 }
 END_TEST
 
@@ -96,10 +96,10 @@ END_TEST
  */
 START_TEST(test_map_remove)
 {
-        UfHashmap *map = NULL;
+        LsHashmap *map = NULL;
 
         /* Construct hashmap like test_map_null_zero but remove elements */
-        map = uf_hashmap_new_full(uf_hashmap_simple_hash, uf_hashmap_simple_equal, NULL, free);
+        map = ls_hashmap_new_full(ls_hashmap_simple_hash, ls_hashmap_simple_equal, NULL, free);
         fail_if(!map, "Failed to construct hashmap");
 
         for (size_t i = 0; i < 1000; i++) {
@@ -107,7 +107,7 @@ START_TEST(test_map_remove)
                 if (asprintf(&p, "VALUE: %ld", i) < 0) {
                         abort();
                 }
-                fail_if(!uf_hashmap_put(map, UF_INT_TO_PTR(i), p), "Failed to insert keypair");
+                fail_if(!ls_hashmap_put(map, LS_INT_TO_PTR(i), p), "Failed to insert keypair");
         }
 
         /* Remove and check at time of removal they're really gone. */
@@ -118,15 +118,15 @@ START_TEST(test_map_remove)
                         abort();
                 }
 
-                v = uf_hashmap_get(map, UF_INT_TO_PTR(i));
+                v = ls_hashmap_get(map, LS_INT_TO_PTR(i));
                 fail_if(!v, "Key doesn't actually exist!");
                 fail_if(strcmp(v, p) != 0, "Key in map is wrong!");
                 free(p);
                 v = NULL;
 
-                fail_if(!uf_hashmap_remove(map, UF_INT_TO_PTR(i)), "Failed to remove keypair");
+                fail_if(!ls_hashmap_remove(map, LS_INT_TO_PTR(i)), "Failed to remove keypair");
 
-                v = uf_hashmap_get(map, UF_INT_TO_PTR(i));
+                v = ls_hashmap_get(map, LS_INT_TO_PTR(i));
                 fail_if(v != NULL, "Key should not longer exist in map!");
         }
 
@@ -134,19 +134,19 @@ START_TEST(test_map_remove)
         for (size_t i = 500; i < 700; i++) {
                 void *v = NULL;
 
-                v = uf_hashmap_get(map, UF_INT_TO_PTR(i));
+                v = ls_hashmap_get(map, LS_INT_TO_PTR(i));
                 fail_if(v != NULL, "Key should not longer exist in map!");
         }
 
         /* Valgrind test would scream here if the list is broken */
-        uf_hashmap_free(map);
+        ls_hashmap_free(map);
 }
 END_TEST
 
 /**
  * Standard helper for running a test suite
  */
-static int uf_test_run(Suite *suite)
+static int ls_test_run(Suite *suite)
 {
         SRunner *runner = NULL;
         int n_failed = 0;
@@ -178,7 +178,7 @@ static Suite *test_create(void)
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char **argv)
 {
-        return uf_test_run(test_create());
+        return ls_test_run(test_create());
 }
 
 /*

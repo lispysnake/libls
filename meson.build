@@ -1,5 +1,5 @@
 project(
-    'libuf',
+    'libls',
     ['c'],
     version: '0.0.0',
     license: [

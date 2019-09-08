@@ -1,5 +1,5 @@
 /*
- * This file is part of libuf.
+ * This file is part of libls.
  *
  * Copyright (c) 2017-2018 Ikey Doherty
  * Copyright (c) 2019 Lispy Snake, Ltd.
@@ -27,15 +27,15 @@
 #include <stdint.h>
 
 /**
- * UfHashmap is an in-memory hashed key-value data structure (dict/map)
+ * LsHashmap is an in-memory hashed key-value data structure (dict/map)
  * typically suited to string key/value pairs.
  */
-typedef struct UfHashmap UfHashmap;
+typedef struct LsHashmap LsHashmap;
 
 /**
  * Required definition for a free function
  */
-typedef void (*uf_hashmap_free_func)(void *v);
+typedef void (*ls_hashmap_free_func)(void *v);
 
 /**
  * Required definition for a hash generator function
@@ -43,7 +43,7 @@ typedef void (*uf_hashmap_free_func)(void *v);
  * @param v Key to be hashed
  * @returns uint32_t hash for the key
  */
-typedef uint32_t (*uf_hashmap_hash_func)(const void *v);
+typedef uint32_t (*ls_hashmap_hash_func)(const void *v);
 
 /**
  * Required definition for key equality function
@@ -52,74 +52,74 @@ typedef uint32_t (*uf_hashmap_hash_func)(const void *v);
  * @param b second item to be compared
  * @returns true if both keys are considered equal.
  */
-typedef bool (*uf_hashmap_equal_func)(const void *a, const void *b);
+typedef bool (*ls_hashmap_equal_func)(const void *a, const void *b);
 
 /**
  * Simple comparison for pointer types.
  */
-bool uf_hashmap_simple_equal(const void *a, const void *b);
+bool ls_hashmap_simple_equal(const void *a, const void *b);
 
 /**
  * Simple hash for pointer types.
  */
-uint32_t uf_hashmap_simple_hash(const void *v);
+uint32_t ls_hashmap_simple_hash(const void *v);
 
 /**
  * Comparison for string keys
  */
-bool uf_hashmap_string_equal(const void *a, const void *b);
+bool ls_hashmap_string_equal(const void *a, const void *b);
 
 /**
  * Slow hash for string keys
  */
-uint32_t uf_hashmap_string_hash(const void *v);
+uint32_t ls_hashmap_string_hash(const void *v);
 
 /**
- * Construct a new UfHashmap with the given @hash and @compare functions.
+ * Construct a new LsHashmap with the given @hash and @compare functions.
  *
  * @param hash A hash generator function
  * @param compare A key equality function
  *
- * @note Free with uf_hashmap_free
+ * @note Free with ls_hashmap_free
  *
- * @return A newly allocated UfHashmap
+ * @return A newly allocated LsHashmap
  */
-UfHashmap *uf_hashmap_new(uf_hashmap_hash_func hash, uf_hashmap_equal_func compare);
+LsHashmap *ls_hashmap_new(ls_hashmap_hash_func hash, ls_hashmap_equal_func compare);
 
 /**
- * Construct a new UfHashmap with key/value free functions
+ * Construct a new LsHashmap with key/value free functions
  *
  * @param hash A hash generator function
  * @param compare A key equality function
  * @param key_free Function to call to free any keys when replaced or the table is freed
  * @param value_free Function to call to free any values when replaced or the table is freed
  *
- * @note Free with uf_hashmap_free
+ * @note Free with ls_hashmap_free
  *
- * @return A newly allocated UfHashmap
+ * @return A newly allocated LsHashmap
  */
-UfHashmap *uf_hashmap_new_full(uf_hashmap_hash_func hash, uf_hashmap_equal_func compare,
-                               uf_hashmap_free_func key_free, uf_hashmap_free_func value_free);
+LsHashmap *ls_hashmap_new_full(ls_hashmap_hash_func hash, ls_hashmap_equal_func compare,
+                               ls_hashmap_free_func key_free, ls_hashmap_free_func value_free);
 
 /**
  * Free a previously allocated hashmap
  *
  * @param map Pointer to a previously allocated map
  */
-void uf_hashmap_free(UfHashmap *map);
+void ls_hashmap_free(LsHashmap *map);
 
 /**
  * Store a key/value mapping within the map
  *
  * @note This will not copy the key or value. Do this before insert
  *
- * @param map Pointer to a valid UfHashmap instance
+ * @param map Pointer to a valid LsHashmap instance
  * @param key Key for the new mapping
  * @param value Value for the new mapping
  *
  * @returns True if the key/value pair could be stored
  */
-bool uf_hashmap_put(UfHashmap *map, void *key, void *b);
+bool ls_hashmap_put(LsHashmap *map, void *key, void *b);
 
 /**
  * Attempt to retrieve the value from the map associated with @key
@@ -128,7 +128,7 @@ bool uf_hashmap_put(UfHashmap *map, void *key, void *b);
  *
  * @returns The stored value, if found.
  */
-void *uf_hashmap_get(UfHashmap *map, void *key);
+void *ls_hashmap_get(LsHashmap *map, void *key);
 
 /**
  * Remove key from the map that matches the given key
@@ -138,7 +138,7 @@ void *uf_hashmap_get(UfHashmap *map, void *key);
  *
  * @returns True if we deleted a matching key/value
  */
-bool uf_hashmap_remove(UfHashmap *map, void *key);
+bool ls_hashmap_remove(LsHashmap *map, void *key);
 
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html

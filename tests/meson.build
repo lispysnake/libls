@@ -4,9 +4,9 @@ required_tests = [
     'map',
 ]
 
-# Just need libuf, self contained.
+# Just need libls, self contained.
 test_dependencies = [
-    link_libuf,
+    link_libls,
     dep_check,
 ]
 

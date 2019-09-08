@@ -1,5 +1,5 @@
 /*
- * This file is part of libuf.
+ * This file is part of libls.
  *
  * Copyright (c) 2017-2018 Ikey Doherty
  * Copyright (c) 2019 Lispy Snake, Ltd.
@@ -24,32 +24,32 @@
 #pragma once
 
 /**
- * Define uf_unlikely(x) macro
+ * Define ls_unlikely(x) macro
  */
-#ifndef uf_unlikely
-#define uf_unlikely(x) __builtin_expect((x), 0)
+#ifndef ls_unlikely
+#define ls_unlikely(x) __builtin_expect((x), 0)
 #endif
 
 /**
- * Define uf_likely(x) macro
+ * Define ls_likely(x) macro
  */
-#ifndef uf_likely
-#define uf_likely(x) __builtin_expect((x), 1)
+#ifndef ls_likely
+#define ls_likely(x) __builtin_expect((x), 1)
 #endif
 
 /**
  * Helper to define some part of the code as unused, but placeholdered
  */
-#ifndef __uf_unused__
-#define __uf_unused__ __attribute__((unused))
+#ifndef __ls_unused__
+#define __ls_unused__ __attribute__((unused))
 #endif
 
-#ifndef UF_PTR_TO_INT
-#define UF_PTR_TO_INT(x) ((unsigned int)((uintptr_t)(x)))
+#ifndef LS_PTR_TO_INT
+#define LS_PTR_TO_INT(x) ((unsigned int)((uintptr_t)(x)))
 #endif
 
-#ifndef UF_INT_TO_PTR
-#define UF_INT_TO_PTR(x) ((void *)((uintptr_t)x))
+#ifndef LS_INT_TO_PTR
+#define LS_INT_TO_PTR(x) ((void *)((uintptr_t)x))
 #endif
 
 /*

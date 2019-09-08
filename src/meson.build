@@ -1,32 +1,32 @@
 # Create the main library
 
-libuf_sources = [
+libls_sources = [
     'map.c',
 ]
 
-libuf_include_directories = [
+libls_include_directories = [
     config_h_dir,
     include_directories('.'),
 ]
 
 if get_option('with-static') == true
-    libuf = static_library('uf',
-        sources: libuf_sources,
+    libls = static_library('ls',
+        sources: libls_sources,
         c_args: am_cflags,
-        include_directories: libuf_include_directories,
+        include_directories: libls_include_directories,
     )
 else
-    libuf = shared_library('uf',
-        sources: libuf_sources,
+    libls = shared_library('ls',
+        sources: libls_sources,
         version: abi_version,
         c_args: am_cflags,
-        include_directories: libuf_include_directories,
+        include_directories: libls_include_directories,
     )
 endif
 
 # Allow other components to link here
-link_libuf = declare_dependency(
-    link_with: libuf,
+link_libls = declare_dependency(
+    link_with: libls,
     include_directories: [
         include_directories('.'),
     ],

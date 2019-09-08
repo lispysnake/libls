@@ -1,6 +1,6 @@
-# libuf
+# libls
 
-Replacement to the defunct [libuf]() project, to provide helpful C APIs
+Replacement to the defunct [libuf](https://github.com/ikeydoherty/libuf) project, to provide helpful C APIs
 to portable programs not looking for a heavy library to link to.
 Primary target is our game engine.
 
@@ -8,7 +8,13 @@ Relicensed under `ZLib` license with permission from sole author at time of
 fork, Ikey Doherty. This relicensing effort is designed to help authors
 integrate into their existing projects.
 
-## TODO
+### Porting
+
+Right now it is trivial to port from `libuf` to `libls`. Simply revendor `libls` and remove `libuf`.
+Replace all `UF_` `uf_` `Uf` namespace usage with `LS_` `ls_` `Ls`. This will cover all previous
+API, including the macros and `LsHashmap` type.
+
+### TODO
 
  - [ ] Cleanup!
  
