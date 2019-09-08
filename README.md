@@ -4,6 +4,8 @@ Replacement to the defunct [libuf](https://github.com/ikeydoherty/libuf) project
 to portable programs not looking for a heavy library to link to.
 Primary target is our game engine.
 
+A [Lispy Snake, Ltd.](https://lispysnake.com/) project.
+
 Relicensed under `ZLib` license with permission from sole author at time of
 fork, Ikey Doherty. This relicensing effort is designed to help authors
 integrate into their existing projects.
@@ -21,6 +23,7 @@ API, including the macros and `LsHashmap` type.
 ### Authors
 
 Copyright © 2017-2018 Ikey Doherty
+
 Copyright 2019 Lispy Snake, Ltd.
 
 libuf is available under the terms of the ZLib license.
