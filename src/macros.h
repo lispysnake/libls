@@ -49,13 +49,40 @@
  */
 #define LS_ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
+/**
+ * Convert a pointer to an integer (for hashing)
+ */
 #ifndef LS_PTR_TO_INT
 #define LS_PTR_TO_INT(x) ((unsigned int)((uintptr_t)(x)))
 #endif
 
+/**
+ * Convert an integer to a pointer (for unhashing)
+ */
 #ifndef LS_INT_TO_PTR
 #define LS_INT_TO_PTR(x) ((void *)((uintptr_t)x))
 #endif
+
+/**
+ * Define an autofree cleanup function. As the pointer goes out of scope,
+ * the cleanup function will automatically be executed, with the pointer
+ * being set to NULL.
+ */
+#define DEF_AUTOFREE(N, C)                                                                         \
+        static inline void _autofree_func_##N(void *p)                                             \
+        {                                                                                          \
+                if (p && *(N **)p) {                                                               \
+                        C(*(N **)p);                                                               \
+                        (*(void **)p) = NULL;                                                      \
+                }                                                                                  \
+        }
+
+/**
+ * Declare an autofree variable. The appropriate DEF_AUTOFREE helper should
+ * already be assigned. Once this variable goes out of scope, it will be
+ * cleared using the cleanup helper.
+ */
+#define autofree(N) __attribute__((cleanup(_autofree_func_##N))) N
 
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
