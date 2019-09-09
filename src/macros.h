@@ -44,6 +44,11 @@
 #define __ls_unused__ __attribute__((unused))
 #endif
 
+/**
+ * Helper to compute static array size
+ */
+#define LS_ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+
 #ifndef LS_PTR_TO_INT
 #define LS_PTR_TO_INT(x) ((unsigned int)((uintptr_t)(x)))
 #endif
