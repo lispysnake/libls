@@ -25,8 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "macros.h"
 #include "map.h"
-#include "util.h"
 
 typedef struct LsHashmapNode LsHashmapNode;
 

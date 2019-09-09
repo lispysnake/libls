@@ -24,8 +24,8 @@
 #pragma once
 
 /* Include main libls headers for convenience */
+#include "macros.h"
 #include "map.h"
-#include "util.h"
 
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html

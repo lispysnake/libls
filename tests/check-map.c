@@ -27,8 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "macros.h"
 #include "map.h"
-#include "util.h"
 
 START_TEST(test_map_simple)
 {
