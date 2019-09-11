@@ -124,8 +124,8 @@ void ls_list_free_full(LsList *list, ls_free_func freer)
 
         while (node) {
                 next = node->next;
-                if (freer && list->data) {
-                        freer(list->data);
+                if (freer && node->data) {
+                        freer(node->data);
                 }
                 free(node);
                 node = next;
