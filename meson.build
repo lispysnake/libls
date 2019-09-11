@@ -62,9 +62,8 @@ with_tests = get_option('with-tests')
 # Now go build the source
 subdir('src')
 
-# Only tested with check 0.12.0. Yes, irony.
 if with_tests == true
-    dep_check = dependency('check', version: '>= 0.12.0')
+    dep_check = dependency('check', version: '>= 0.10.0')
     subdir('tests')
 endif
 

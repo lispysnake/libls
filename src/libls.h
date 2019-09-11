@@ -24,6 +24,7 @@
 #pragma once
 
 /* Include main libls headers for convenience */
+#include "list.h"
 #include "macros.h"
 #include "map.h"
 

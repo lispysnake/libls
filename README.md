@@ -10,6 +10,14 @@ Relicensed under `ZLib` license with permission from sole author at time of
 fork, Ikey Doherty. This relicensing effort is designed to help authors
 integrate into their existing projects.
 
+![derghuns](https://raw.githubusercontent.com/lispysnake/libls/master/.github/derghuns.jpg)
+
+**Warning**
+
+This library is under heavy development and should be currently considered unstable.
+All development work will be to support the new Lispy Snake 2D engine so APIs and
+ABIs are unstable.
+
 ### Porting
 
 Right now it is trivial to port from `libuf` to `libls`. Simply revendor `libls` and remove `libuf`.
