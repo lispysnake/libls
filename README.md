@@ -34,4 +34,4 @@ Copyright © 2017-2018 Ikey Doherty
 
 Copyright 2019 Lispy Snake, Ltd.
 
-libuf is available under the terms of the ZLib license.
+libls is available under the terms of the ZLib license.
