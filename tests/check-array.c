@@ -26,9 +26,11 @@
 #include <check.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "array.h"
 #include "macros.h"
+#include "ptr-array.h"
 
 /**
  * Simple test to validate append
@@ -64,7 +66,32 @@ START_TEST(test_array_simple_add)
         fail_if(ptr_x->x != 12, "Incorrect Z");
         fail_if(ptr_x->j != 62, "Incorrect Z");
 
+        fail_if(array->len != 3, "Incorrect array length");
+
         ls_array_free(array, NULL);
+}
+END_TEST
+
+START_TEST(test_ptr_array_simple_add)
+{
+        LsPtrArray *array = NULL;
+
+        array = ls_ptr_array_new();
+        fail_if(!array, "Failed to construct pointer array");
+
+        fail_if(!ls_array_add(array, strdup("john")), "Failed to add john");
+        fail_if(!ls_array_add(array, strdup("bobby")), "Failed to add bobby");
+        fail_if(!ls_array_add(array, strdup("rupert")), "Failed to add rupert");
+        fail_if(!ls_array_add(array, strdup("harry")), "Failed to add harry");
+
+        fail_if(strcmp(array->data[0], "john") != 0, "Failed to get john");
+        fail_if(strcmp(array->data[1], "bobby") != 0, "Failed to get bobby");
+        fail_if(strcmp(array->data[2], "rupert") != 0, "Failed to get rupert");
+        fail_if(strcmp(array->data[3], "harry") != 0, "Failed to get harry");
+
+        fail_if(array->len != 4, "Incorrect array length");
+
+        ls_array_free(array, free);
 }
 END_TEST
 
@@ -94,6 +121,7 @@ static Suite *test_create(void)
         suite_add_tcase(s, tc);
 
         tcase_add_test(tc, test_array_simple_add);
+        tcase_add_test(tc, test_ptr_array_simple_add);
 
         return s;
 }

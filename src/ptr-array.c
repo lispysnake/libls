@@ -21,14 +21,17 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
-
-/* Include main libls headers for convenience */
-#include "array.h"
-#include "list.h"
-#include "macros.h"
-#include "map.h"
 #include "ptr-array.h"
+
+LsPtrArray *ls_ptr_array_new()
+{
+        return ls_ptr_array_new_size(0);
+}
+
+LsPtrArray *ls_ptr_array_new_size(uint16_t reserved)
+{
+        return ls_array_new_size(sizeof(void *), reserved);
+}
 
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html

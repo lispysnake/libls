@@ -4,6 +4,7 @@ libls_sources = [
     'array.c',
     'list.c',
     'map.c',
+    'ptr-array.c',
 ]
 
 libls_include_directories = [

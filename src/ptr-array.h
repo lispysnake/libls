@@ -23,12 +23,20 @@
 
 #pragma once
 
-/* Include main libls headers for convenience */
 #include "array.h"
-#include "list.h"
-#include "macros.h"
-#include "map.h"
-#include "ptr-array.h"
+
+typedef LsArray LsPtrArray;
+
+/**
+ * Construct a new pointer-specific array
+ */
+LsPtrArray *ls_ptr_array_new(void);
+
+/**
+ * Construct a new LsArray with the given item size, pre-allocating
+ * the given number of blocks.
+ */
+LsPtrArray *ls_ptr_array_new_size(uint16_t reserved);
 
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
