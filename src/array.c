@@ -58,7 +58,7 @@ bool ls_array_add(LsArray *self, void *data)
                 return false;
         }
 
-        uint16_t new_size = self->len + 1;
+        uint16_t new_size = (uint16_t)(self->len + 1);
 
         /* First allocation of data blob */
         if (ls_unlikely(!self->data)) {
@@ -77,7 +77,7 @@ bool ls_array_add(LsArray *self, void *data)
                 }
                 self->size = new_size;
         }
-        self->len += 1;
+        self->len++;
         self->data[self->len - 1] = data;
 
         return true;
