@@ -1,6 +1,7 @@
 # Create the main library
 
 libls_sources = [
+    'array.c',
     'list.c',
     'map.c',
 ]

@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include "macros.h"
+
 /**
  * LsList is a singly-linked list type used for basic storage needs.
  * List types should be used with care, as insert operations may become
@@ -32,11 +34,6 @@ typedef struct LsList {
         void *data;
         struct LsList *next;
 } LsList;
-
-/**
- * ls_free_func defines the prototype for free-helpers
- */
-typedef void (*ls_free_func)(void *v);
 
 /**
  * Prepend the given pointer to the list, returning the new location

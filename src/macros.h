@@ -84,6 +84,11 @@
  */
 #define autofree(N) __attribute__((cleanup(_autofree_func_##N))) N
 
+/**
+ * ls_free_func defines the prototype for free-helpers
+ */
+typedef void (*ls_free_func)(void *v);
+
 /*
  * Editor modelines  -  https://www.wireshark.org/tools/modelines.html
  *
