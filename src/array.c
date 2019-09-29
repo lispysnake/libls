@@ -78,7 +78,9 @@ bool ls_array_add(LsArray *self, void *data)
                 self->size = new_size;
         }
         self->len++;
-        self->data[self->len - 1] = data;
+        if (data) {
+                self->data[self->len - 1] = data;
+        }
 
         return true;
 }
